@@ -1,0 +1,194 @@
+
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>鼠标拾取地图坐标</title>
+    <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css" />
+	<script type="text/javascript" src="https://webapi.amap.com/maps?v=1.4.15&key=141d1ce66f60be30a7a747eb55ddc62e&plugin=AMap.Autocomplete,AMap.PlaceSearch"></script>
+    <script type="text/javascript" src="https://cache.amap.com/lbs/static/addToolbar.js"></script>
+</head>
+<style type="text/css">
+    html,body, #container {
+        width: 100%;
+        height: 100%;
+        margin: 0px;
+    }
+    .map{
+        height: 100%;
+        width: 100%;
+        float: left;
+    }
+	.content-window-card {
+            position: relative;
+            box-shadow: none;
+            bottom: 0;
+            left: 0;
+            width: auto;
+            padding: 0;
+        }
+
+        .content-window-card p {
+            height: 2rem;
+        }
+
+        .custom-info {
+            border: solid 1px silver;
+        }
+
+        div.info-top {
+            position: relative;
+            background: none repeat scroll 0 0 #F9F9F9;
+            border-bottom: 1px solid #CCC;
+            border-radius: 5px 5px 0 0;
+        }
+
+        div.info-top div {
+            display: inline-block;
+            color: #333333;
+            font-size: 14px;
+            font-weight: bold;
+            line-height: 31px;
+            padding: 0 10px;
+        }
+
+        div.info-top img {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition-duration: 0.25s;
+        }
+
+        div.info-top img:hover {
+            box-shadow: 0px 0px 5px #000;
+        }
+
+        div.info-middle {
+            font-size: 12px;
+            padding: 10px 6px;
+            line-height: 20px;
+        }
+
+        div.info-bottom {
+            height: 0px;
+            width: 100%;
+            clear: both;
+            text-align: center;
+        }
+
+        div.info-bottom img {
+            position: relative;
+            z-index: 104;
+        }
+
+        span {
+            margin-left: 5px;
+            font-size: 11px;
+        }
+
+        .info-middle img {
+            float: left;
+            margin-right: 6px;
+        }
+</style>
+<body>
+<div id="container" class="map"></div>
+<div class="input-card">
+    <h4>左击获取经纬度：</h4>
+    <div class="input-item">
+      <input type="text" readonly="true" id="lnglat">
+    </div>
+	<table>
+        <tr>
+            <td>
+                <label>请输入关键字：</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input id="tipinput"/>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="container"></div>
+<div class="info"></div>
+    点击地图上的点标记，打开所添加的自定义信息窗体
+</div>
+<script type="text/javascript">
+    var map = new AMap.Map("container", {
+		resizeEnable: true, //是否监控地图容器尺寸变化
+        zoom:15, //初始化地图层级
+        center: [106.551654,29.571383] //初始化地图中心点
+    });
+    //为地图注册click事件获取鼠标点击出的经纬度坐标
+    map.on('click', function(e) {
+        document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat()
+   });
+    //输入提示
+    var autoOptions = {
+        input: "tipinput"
+    };
+    var auto = new AMap.Autocomplete(autoOptions);
+    var placeSearch = new AMap.PlaceSearch({
+        map: map
+    });  //构造地点查询类
+    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+    function select(e) {
+        placeSearch.setCity(e.poi.adcode);
+        placeSearch.search(e.poi.name);  //关键字查询查询
+    }
+    var lnglats = [
+        [106.563077,29.544721],
+        [106.520827,29.552701],
+        [106.532442,29.520103],
+        [106.255393,29.260267],
+		[106.580266,29.585489],
+        [106.551608,29.54031],
+        [106.591366,29.557721],
+        [106.290478,29.271598],
+		[106.261231,29.29367],
+        [106.585311,29.603959]
+    ];
+	var infoWindow = new AMap.InfoWindow({offset: new AMap.Pixel(0, -30)});
+    for (var i = 0, marker; i < lnglats.length; i++) {
+        var marker = new AMap.Marker({
+            position: lnglats[i],
+            map: map
+        });
+		if(i==0){
+	    marker.content = '<img src=https://bkimg.cdn.bcebos.com/pic/3b292df5e0fe99256d88e5063ba85edf8cb171e4?x-bce-process=image/watermark,image_d2F0ZXIvYmFpa2U5Mg==,g_7,xp_5,yp_5/format,f_auto> 重庆长江大桥 编号01 地址：重庆市渝中区菜园坝街道石板坡和南岸区梨子园之间';
+	}
+		if(i==1){
+        marker.content = '<img src=https://tse1-mm.cn.bing.net/th/id/R-C.81bb7e614da0f8b7963a79bb2f4fe456?rik=1pRvhd%2b3SzYhCQ&riu=http%3a%2f%2fn.sinaimg.cn%2fcq%2ftransform%2f266%2fw640h426%2f20190807%2f4fe4-iaxiufn2460703.jpg&ehk=OqLnAEwUjJ1sSDN2y4gHiRcZm5uoMxnd1OsF5S2MSo4%3d&risl=&pid=ImgRaw> 重庆嘉华大桥 编号02 地址：重庆市江北区';
+	
+	}
+		if(i==2){
+        marker.content = '<img src=https://tse1-mm.cn.bing.net/th/id/R-C.3909fcb5112692ce0ffd3851a203769f?rik=hX8FIp%2f89QkrVA&riu=http%3a%2f%2fwww.civilcn.com%2fd%2ffile%2fluqiao%2ftuku%2f2012-11-16%2fcada2256bb74f41568aeec01f3322d44.jpg&ehk=d63vTcnsrytaC6YQkrMAB64QyVSmiu5g%2fggyBZsIoyg%3d&risl=&pid=ImgRaw> 鹅公岩长江大桥 编号03 地址：重庆市九龙坡区南滨路世纪花园旁';}
+		if(i==3){
+        marker.content = '<img src=https://pimage.cqcb.com/d/file/hot/2020-06-08/eaf18f9198c74ab9f70fb9d9ad162443.png> 江津长江公路大桥 编号04 地址：重庆市江津区';}
+		if(i==4){
+        marker.content = '<img src=https://tse1-mm.cn.bing.net/th/id/R-C.7fa9e5440fa0c95f623d3a6ffa54aa75?rik=VlYHdfviXEMeNA&riu=http%3a%2f%2fimg.pconline.com.cn%2fimages%2fupload%2fupc%2ftx%2fphotoblog%2f1310%2f03%2fc1%2f26762982_26762982_1380754077847_mthumb.jpg&ehk=xVRa8L7uemXzHwd%2fGRqwhc3D%2bwW1JAVQbbi8OewYdp4%3d&risl=&pid=ImgRaw> 朝天门长江大桥 编号05 地址：重庆市江北区';}
+		if(i==5){
+        marker.content = '<img src=https://p1.ssl.qhmsg.com/t016632a5a166227542.jpg> 菜园坝长江大桥 编号06 地址：重庆市南岸区';}
+		if(i==6){
+        marker.content = '<img src=https://tse2-mm.cn.bing.net/th/id/OIP-C.Uaj9yN2eoKcGU5hR8Yp48gHaEK?pid=ImgDet&rs=1> 东水门长江大桥 编号07 地址：重庆市南岸区';}
+		if(i==7){
+        marker.content = '<img src=https://tse2-mm.cn.bing.net/th/id/OIP-C.jRhp0oF2XBCSxSD2a0aI-wHaDu?pid=ImgDet&rs=1> 鼎山长江大桥 编号08 地址：重庆市江津区';}
+		if(i==8){
+        marker.content = '<img src=https://tse1-mm.cn.bing.net/th/id/R-C.bb6ba456642018775f2797faef58ed66?rik=nlbUCdSQBvl5zg&riu=http%3a%2f%2fwww.gov.cn%2fxinwen%2f2016-07%2f08%2f5089710%2fimages%2fc79830ac773345af91e68b871eee169e.jpg&ehk=NGFVrL30HxSvFzrZu6TwErMERLlV2sr1KvrKqwrNE60%3d&risl=&pid=ImgRaw> 几江长江大桥 编号09 地址：重庆市江津区';}
+		if(i==9){
+        marker.content = '<img src=https://p3.pstatp.com/large/3125000ca64d7ed71b5c> 大佛寺长江大桥 编号10 地址：重庆市江北区';}
+        marker.on('click', markerClick);
+        marker.emit('click', {target: marker});
+    }
+    function markerClick(e) {
+        infoWindow.setContent(e.target.content);
+        infoWindow.open(map, e.target.getPosition());
+    }
+    map.setFitView();
+</script>
+</body>
+</html>
